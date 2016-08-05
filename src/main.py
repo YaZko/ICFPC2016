@@ -1,4 +1,4 @@
-import solver
+import solver,solver2
 import requests
 import json
 
@@ -17,11 +17,21 @@ if get_snap:
 
 snap = json.load(open("snapshot.last"))
 
-pb_id = 1
-pb_hash = snap["problems"][pb_id]["problem_spec_hash"]
-r = requests.get('http://2016sv.icfpcontest.org/api/blob/%s'%pb_hash,headers=headers)
+pb_id = 17
+for pb_id in range(100):
+    try:
+        pb_data = open("pb/%s.pb"%pb_id).read()
+    except Exception as e:
+        print("fetch pb",pb_id)
+        pb_hash = snap["problems"][pb_id]["problem_spec_hash"]
+        r = requests.get('http://2016sv.icfpcontest.org/api/blob/%s'%pb_hash,headers=headers)
 # print(r.text)
+        pb_data = r.text
+        with open("pb/%s.pb"%pb_id,"w") as pb_file:
+            pb_file.write(pb_data)
+
 solution = solver.solve(pb_data)
-print(solution)
+solution = solver2.solve(pb_data)
+print("\n",solution)
 # content = gzip.decompress(r.content)
 # print(content)
