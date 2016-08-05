@@ -1,5 +1,5 @@
 def solve(data):
-    print(data)
+#     print(data)
     polys,skel = parse(data)
     
     return "fail"
@@ -23,8 +23,9 @@ def parse(data):
         seg = tuple([tuple([fr(x) for x in y.split(",")]) for y in data.pop().split(" ")])
         skel.append(seg)
 
-    print(polys)
-    print(skel)
+#     print(polys)
+#     print(skel)
+    print(nb_skel)
     return polys,skel
     
 class fr:
