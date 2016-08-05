@@ -90,7 +90,7 @@ let print_silhouette (s : silhouette) : unit =
 	     
 
 
-let s1 = parse_silouhette "pb/ex"
+let s1 = parse_silouhette "pb/3.pb"
 
 let () =
   print_silhouette s1
