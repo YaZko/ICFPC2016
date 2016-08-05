@@ -1,6 +1,7 @@
 def solve(data):
     print(data)
     polys,skel = parse(data)
+    
     return "fail"
 
 def parse(data):
