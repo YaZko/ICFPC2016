@@ -50,12 +50,16 @@ class Facet():
 
 class Problem():
 
-    def __init__(self,verticies):
-        self.skeleton = []
+    def __init__(self,verticies,skel):
+        self.skeleton = skel
         self.silhouette = Facet(verticies)
 
     def __str__(self):
-        return str(self.silhouette) 
+        skel = 'Skel:\n['
+        for v in self.skeleton:
+            skel = skel + str(v) + ' '
+        skel = skel + ']\nSilhouette :\n'
+        return skel + str(self.silhouette) 
 
 def parse_frac(s):
     p = s.split('/')
@@ -86,10 +90,20 @@ def parse(fname):
         verticies = []
 
         for _ in range(nb_vert - 1):
-            v = Vert(parse_point(lines[current]),parse_point(lines[current]))
-            print('v : {}'.format(v))
+            v = Vert(parse_point(lines[current]),parse_point(lines[current + 1]))
             verticies.append(v)
             current += 1
         facets.append(Facet(verticies))
 
-    return Problem(verticies)
+    current +=1
+    nb_seg = int(lines[current])
+    current += 1
+    skel = []
+
+    for _ in range(nb_seg):
+        (p1,p2) = lines[current].split()
+        v = Vert(parse_point(p1),parse_point(p2))
+        skel.append(v)
+        current += 1
+
+    return Problem(verticies,skel)
