@@ -17,7 +17,7 @@ if get_snap:
 
 snap = json.load(open("snapshot.last"))
 
-for pb_id in range(100):
+for pb_id in range(101):
     try:
         pb_data = open("pb/%s.pb"%(pb_id+1)).read()
     except Exception as e:
