@@ -161,13 +161,16 @@ class Edge():
             return True
 
     def compute_intersection(self,edge):
-        a,b,c,d = self.p1,self.p2,edge.p1,edge.p2
-        deter = Fraction(1,det(b.y-a.y,d.y-c.y,a.x-b.x,c.x-d.x))
-        px = ((c.x-d.x)*(a.x*(b.y - a.y)+a.y*(a.x-b.x)) +
-              (c.y-d.y)*(c.x*(d.y-c.y)+c.y*(c.x-d.x))) * deter
-        py = ((b.x-a.x)*(a.x*(b.y - a.y)+a.y*(a.x-b.x)) +
-              (b.y-a.y)*(c.x*(d.y-c.y)+c.y*(c.x-d.x))) * deter
-        return Point(px,py)
+        p1,p2,p3,p4 = self.p1,self.p2,edge.p1,edge.p2
+        deter = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x)
+        px = (p1.x * p2.y - p1.y * p2.x) * (p3.x - p4.x) - (p1.x - p2.x) * (p3.x * p4.y - p3.y * p4.x)
+        py = (p1.x * p2.y - p1.y * p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x * p4.y - p3.y * p4.x)
+        # deter = Fraction(1,det(p2.y-p1.y,p4.y-p3.y,p1.x-p2.x,p3.x-p4.x))
+        # px = ((p3.x-p4.x)*(p1.x*(p2.y - p1.y)+p1.y*(p1.x-p2.x)) +
+        #       (p2.x-p1.x)*(p1.x*(p2.y - p1.y)+p1.y*(p1.x-p2.x)) * deter
+        # py = ((p3.y-p4.y)*(p3.x*(p4.y-p3.y)+p3.y*(p3.x-p4.x))) +
+        #       (p2.y-p1.y)*(p3.x*(p4.y-p3.y)+p3.y*(p3.x-p4.x))) * deter
+        return Point(px / deter, py / deter)
 
     # Computes the vector defined by the edge
     def to_vect(self):
@@ -299,13 +302,14 @@ p22 = Point(Fraction(2),Fraction(2))
 p31 = Point(Fraction(3),Fraction(1))
 
 ed1 = Edge(pm11,p31)
-ed2 = Edge(p02,p00)
+ed2 = Edge(p00,p02)
 
+print ed1.compute_intersection(ed2)
 
-e1 = Edge(p1,p2)
-e2 = Edge(p3,p4)
-e3 = Edge(p1,p4)
-e4 = Edge(p2,p3)
+# e1 = Edge(p1,p2)
+# e2 = Edge(p3,p4)
+# e3 = Edge(p1,p4)
+# e4 = Edge(p2,p3)
 
-l1 = [p02,pm11,p31,p22]
-l2 = [p02,p00,p20,p22]
+# l1 = [p02,pm11,p31,p22]
+# l2 = [p02,p00,p20,p22]
