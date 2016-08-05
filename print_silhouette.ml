@@ -106,4 +106,4 @@ let print_problem (s, sk : silhouette * skeleton) : unit =
 
 
 let () =
-  print_problem (parse_problem "pb/16.pb")
+  print_problem (parse_problem "pb/34.pb")
