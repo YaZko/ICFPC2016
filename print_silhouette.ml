@@ -79,18 +79,15 @@ let print_problem (s, sk : silhouette * skeleton) : unit =
   let ys = List.map snd points in
   let minx, maxx = BatList.min_max ~cmp:compare_num xs in
   let miny, maxy = BatList.min_max ~cmp:compare_num ys in
-  let minx = minx - (of_float 0.01) in
-  let maxx = maxx + (of_float 0.01) in
-  let miny = miny - (of_float 0.01) in
-  let maxy = maxy + (of_float 0.01) in
+  let minx = (min_num zero minx) - (of_float 0.01) in
+  let maxx = (max_num one maxx) + (of_float 0.01) in
+  let miny = (min_num zero miny) - (of_float 0.01) in
+  let maxy = (max_num one maxy) + (of_float 0.01) in
   let maxmax = max_num (maxx - minx) (maxy - miny) in
   let scale_and_translate (x,y : num * num) : int * int =
     to_int (approx (((x - minx) * of_int width) / maxmax)),
     to_int (approx (((y - miny) * of_int width) / maxmax))
   in
-  open_graph "";
-  set_window_title "youhou";
-  resize_window width width;
   (* draw unit square *)
   set_color blue;
   let sq = [| zero, zero; one, zero; one, one; zero, one |] in
@@ -100,10 +97,19 @@ let print_problem (s, sk : silhouette * skeleton) : unit =
   (* draw the skeleton *)
   List.iter (print_segment scale_and_translate) sk;
   (* press a key to exit *)
-  let _ = read_key () in
-  close_graph ()
+  (* let _ = read_key () in *)
+  (* close_graph () *)
 	    
-
+open Images;;
 
 let () =
-  print_problem (parse_problem "pb/34.pb")
+  open_graph "";
+  set_window_title "youhou";
+  resize_window width width;
+  for i = 1 to 100 do
+    clear_graph ();
+    print_problem (parse_problem ("pb/" ^ (string_of_int i) ^ ".pb"));
+    let img = get_image 0 0 width width in
+    sauver_image (dump_image img) ("pb/" ^ (string_of_int i) ^ ".png");
+  done;
+  close_graph ()
