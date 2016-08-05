@@ -106,7 +106,7 @@ let () =
   open_graph "";
   set_window_title "youhou";
   resize_window width width;
-  for i = 1 to 100 do
+  for i = 1 to 101 do
     clear_graph ();
     print_problem (parse_problem ("pb/" ^ (string_of_int i) ^ ".pb"));
     let img = get_image 0 0 width width in
