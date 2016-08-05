@@ -9,12 +9,6 @@ class Point():
     def __str__(self):
         return '({},{})'.format(self.x,self.y)
 
-    def get_x(self):
-        return self.x
-
-    def get_y(self):
-        return self.y
-
 class Vert():
     def __init__(self,p1,p2):
         self.p1 = p1
@@ -107,3 +101,6 @@ def parse(fname):
         current += 1
 
     return Problem(verticies,skel)
+
+def solve(data):
+    return "fail"
