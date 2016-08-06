@@ -1,8 +1,9 @@
-(* OCaml toplevel to run: ocaml graphics.cma *)
+(* OCaml toplevel to run: ocaml graphics.cma images.cmo *)
 open Batteries
-open BatNum
-open BatIO
+open Num
+open IO
 open Graphics
+open List
        
 type point = num * num
 type segment = point * point
@@ -11,20 +12,24 @@ type polygon = point list
 
 type silhouette = polygon list
 type skeleton = segment list
-			  
+
+let string_of_point (x, y : point) = (Num.to_string x) ^ "," ^ (Num.to_string y)
+let string_of_segment (p, q : segment) = "(" ^ (string_of_point p) ^ ";" ^ (string_of_point q) ^ ")"
+let string_of_polygon (l : polygon) = "[" ^ String.concat ";" (map string_of_point l) ^ "]"
+											 
 let parse_num (s : string) : num =
   try
-    let s1, s2 = BatString.split s "/" in
+    let s1, s2 = String.split s "/" in
     (of_string s1) / (of_string s2)
   with
   | Not_found -> of_string s
 			    
 let parse_point (s : string) : point =
-  let s1, s2 = BatString.split s "," in
+  let s1, s2 = String.split s "," in
   parse_num s1, parse_num s2
 
 let parse_segment (s : string) : segment =
-  let s1, s2 = BatString.split s " " in
+  let s1, s2 = String.split s " " in
   parse_point s1, parse_point s2
   
 
@@ -50,12 +55,28 @@ let parse_problem (filename : string) : silhouette * skeleton =
   done;
   !silh, !skel
 
-  
-	    
+
+let det (x1,y1 : point) (x2,y2 : point) =
+  x1 * y2 - x2 * y1
+
+(* if ab, ac is direct (angle between 0 and pi) *)
+let ccw (xa, ya : point) (xb, yb : point) (xc, yc : point) : bool =
+  ((xb - xa) * (yc - ya) - (xc - xa) * (yb - ya)) <=/ zero
+
+
+let succ = Pervasives.succ
+let pred = Pervasives.pred
 
 let is_positive (p : polygon) : bool =
-  true
-
+  let verts = Array.of_list p in
+  let n = Array.length verts in
+  let minx, _ = min_max ~cmp:compare_num (map fst p) in
+  let p' = filter (equal minx % fst) p in
+  let _, maxy = min_max ~cmp:compare_num (map snd p') in
+  let i = hd (filteri_map
+		(fun i (x, y) -> if equal x minx && equal y maxy then Some i else None) p) in
+  ccw verts.(i) verts.(pred (Pervasives.(+) i n) mod n) verts.(succ i mod n)
+    
 
 let width = 950
 	      
@@ -63,7 +84,7 @@ let print_polygon (sat : num * num -> int * int) (p : polygon) : unit =
   if is_positive p then
     set_color red
   else set_color white;
-  let p' = Array.map sat (BatArray.of_list p) in
+  let p' = Array.map sat (Array.of_list p) in
   fill_poly p'
 
 let print_segment (sat : num * num -> int * int) (s1, s2 : segment) : unit =
@@ -74,11 +95,11 @@ let print_segment (sat : num * num -> int * int) (s1, s2 : segment) : unit =
   draw_segments [| x, y, x', y' |]
 	      
 let print_problem (s, sk : silhouette * skeleton) : unit =
-  let points = List.concat s in
-  let xs = List.map fst points in
-  let ys = List.map snd points in
-  let minx, maxx = BatList.min_max ~cmp:compare_num xs in
-  let miny, maxy = BatList.min_max ~cmp:compare_num ys in
+  let points = concat s in
+  let xs = map fst points in
+  let ys = map snd points in
+  let minx, maxx = min_max ~cmp:compare_num xs in
+  let miny, maxy = min_max ~cmp:compare_num ys in
   let minx = (min_num zero minx) - (of_float 0.01) in
   let maxx = (max_num one maxx) + (of_float 0.01) in
   let miny = (min_num zero miny) - (of_float 0.01) in
@@ -95,12 +116,9 @@ let print_problem (s, sk : silhouette * skeleton) : unit =
   (* draw the polygons *)
   List.iter (print_polygon scale_and_translate) s;
   (* draw the skeleton *)
-  List.iter (print_segment scale_and_translate) sk;
-  (* press a key to exit *)
-  (* let _ = read_key () in *)
-  (* close_graph () *)
+  List.iter (print_segment scale_and_translate) sk
 	    
-open Images;;
+open Images
 
 let () =
   open_graph "";
@@ -113,3 +131,17 @@ let () =
     sauver_image (dump_image img) ("pb/" ^ (string_of_int i) ^ ".png");
   done;
   close_graph ()
+  (* let pb = (parse_problem ("pb/27.pb")) in *)
+  (* let p1 = hd (fst pb) in *)
+  (* let p2 = hd (tl (fst pb)) in *)
+  (* print_endline (string_of_polygon p1); *)
+  (* print_bool (is_positive p1); print_newline (); print_newline (); *)
+  (* print_endline (string_of_polygon p2); *)
+  (* print_bool (is_positive p2); print_newline (); print_newline (); *)
+  (* let pb = (parse_problem ("pb/sim")) in *)
+  (* let p1 = hd (fst pb) in *)
+  (* let p2 = hd (tl (fst pb)) in *)
+  (* print_endline (string_of_polygon p1); *)
+  (* print_bool (is_positive p1); print_newline (); *)
+  (* print_endline (string_of_polygon p2); *)
+  (* print_bool (is_positive p2); print_newline () *)
