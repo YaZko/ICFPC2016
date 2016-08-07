@@ -791,7 +791,7 @@ def is_included(main,poly):
         b = b and is_inside(main,e.y)
     return b
 
-def solve(pb):
+def solve(idx,pb):
 
     p00 =  Point(Fraction(0),Fraction(0))
     p10 =  Point(Fraction(1),Fraction(0))
@@ -826,9 +826,9 @@ def solve(pb):
     while unfinished:
         snapshot = current
         # print('CYCLED')
-        k += 1
-        if k == 4:
-            raise
+        # k += 1
+        # if k == 4:
+        #     raise
 
         for (i,_) in enumerate(verts):
             # print('current : {}'.format(current))
@@ -848,7 +848,9 @@ def solve(pb):
                 current,facets_init = fold(current,e,-1,facets_init)
 
         if current == rotate_to_fit(snapshot,current[0]):
-            raise('Cycled without change')
+            print('Problem {} has cycled'.format(idx))
+            break
+            # raise('Cycled without change')
 
     # print('pretty please: {}'.format(facets_init))
     facets_init = [(elim_col(elim_doubles(l[0])),l[1]) for l in facets_init]
@@ -957,22 +959,18 @@ baz = Edge(Point(Fraction(2,3),Fraction(0)),Point(Fraction(1,3),Fraction(1)))
 # sol9.output('../sol/9.sol')
 
 def solve_prob(id):
-    pb = parse('../pb/' + str(id) + '.pb')
-    sol = solve(pb)
-    sol.output('../sol/' + str(id) + '.sol')
+    pb = parse('../fitting_convex/' + str(id) + '.pb')
+    sol = solve(id,pb)
+    sol.output('../fitting_convex/sol/' + str(id) + '.sol')
 
-try:
-    solve_prob(19)
-except:
-    pass
+# solve_prob(10)
 
-# for i in range(15,20):
-#     try:
-#         print(i)
-#         solve_prob(i)
-#         print(i)
-#     except:
-#         pass
+for i in range(6000):
+    try:
+        solve_prob(i)
+        print(i)
+    except:
+        pass
 
 # for i in range(2237,2727):
 #     try:
