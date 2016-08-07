@@ -12,7 +12,7 @@ let () =
   open_graph "";
   set_window_title "youhou";
   resize_window width width;
-  for i = 1 to 100 do
+  for i = 1 to 200 do
     clear_graph ();
     try
       draw_problem (parse_problem (dirpath ^ (string_of_int i) ^ ".pb"));
