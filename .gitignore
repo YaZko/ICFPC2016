@@ -2,7 +2,10 @@
 __pycache__*
 *.pyc
 *.last
-pb/*
 *~
 *.cmo
 *.cmi
+snapshot.*
+caml/solver
+caml/make_images
+*.sol

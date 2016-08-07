@@ -93,9 +93,11 @@ let unit_length_segments_polygon (p : polygon) : segment list =
 let unit_length_segments (s : silhouette) : segment list =
   concat (map unit_length_segments_polygon s)
   
+let eq_point : point -> point -> bool =
+  Tuple2.eq eq_num eq_num
 	    
 let is_unit_square (p : polygon) =
-  eq (Tuple2.eq eq_num eq_num) p (hd (fst id_pb))
+  eq eq_point p (hd (fst id_pb))
 	 
 let is_id_pb (s, sk : problem) =
   match s with
@@ -162,81 +164,119 @@ let translate_left_bottom_on_zero (s, sk : problem) : pb_transformer =
   let miny, _ = min_max ~cmp:compare_num (map snd points) in
   translate (inv (minx, miny))
 
+let next_top (s : 'a Stack.t) : 'a =
+  let t = Stack.pop s in
+  let n = Stack.top s in
+  Stack.push t s;
+  n
 
-(* let convex_hull (s, _ : problem) : polygon = *)
-(*   let points = concat s in *)
-(*   let stack = Stack.create () in *)
-	   
-	    
+(* p1 < p2 if the polar angle of p0p1 is < those of p0p2*)
+let compare_point (p0 : point) (p1 : point) (p2 : point) =
+  let a1 = float_of_num ((fst p1) - (fst p0)) /. sqrt (float_of_num (squared_norm (minus p1 p0))) in
+  let a2 = float_of_num ((fst p2) - (fst p0)) /. sqrt (float_of_num (squared_norm (minus p2 p0))) in
+  if Float.abs (a2 -. a1) > 0.000001 then Float.compare a2 a1 else
+    Num.compare (squared_norm (minus p1 p0)) (squared_norm (minus p2 p0))
+		
+let same_angle (p0 : point) (p1 : point) (p2 : point) =
+  let a1 = float_of_num ((fst p1) - (fst p0)) /. sqrt (float_of_num (squared_norm (minus p1 p0))) in
+  let a2 = float_of_num ((fst p2) - (fst p0)) /. sqrt (float_of_num (squared_norm (minus p2 p0))) in
+  Float.abs (a2 -. a1) < 0.000001
+
+    
+let convex_hull (s, _ : problem) : polygon =
+  let points = concat s in
+  let miny, _ = min_max ~cmp:compare_num (map snd points) in
+  let points' = filter (equal miny % snd) points in
+  let minx, _ = min_max ~cmp:compare_num (map fst points') in
+  let p0 = (minx, miny) in
+  let points = filter (fun x -> not (eq_point p0 x)) points in
+  (* sort points *)
+  let points = sort (compare_point p0) points in
+  let points = unique ~eq:(same_angle p0) points in
+  let points = Array.of_list points in
+  let s = Stack.create () in
+  Stack.push p0 s;
+  Stack.push points.(0) s;
+  Stack.push points.(1) s;
+  for i = 2 to pred (Array.length points) do
+    while not (ccw (Stack.top s) (next_top s) points.(i)) do
+      ignore (Stack.pop s);
+    done;
+    Stack.push points.(i) s
+  done;
+  rev (of_enum (Stack.enum s))
+
+
+
 let () =
-  let pb_max = 5009 in
-  let sol_trs = Array.make (succ pb_max) (fun s -> s) in
-  let todo = Array.make (succ pb_max) false in
-  for i = 1 to pb_max do
+
+  for i = 1 to 4909 do
     try
-      let pb = parse_problem ("../pb/" ^ (string_of_int i) ^ ".pb") in
-      try
-	let pb_tr, sol_tr = solve_by_translation_rotate pb in
-	(* ignore (Sys.command ("mv ../pb/" ^ (string_of_int i) ^ ".pb ../pb/solved/" ^ (string_of_int i) ^ ".pb ")); *)
-	File.write_lines ("../pb/" ^ (string_of_int i) ^ ".sol") (Enum.singleton (string_of_solution (sol_tr id_sol)))
-      with
-      | Not_found -> (
-	if is_convex_pb pb then
-	  if included_in_unit_square pb then (
-	    todo.(i) <- true;
-	    ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/convex/fit/" ^ (string_of_int i) ^ ".pb "))
-	  ) else
-	    try
-	      let pb_tr, sol_tr = fit_by_translation_rotate pb in
-	      todo.(i) <- true;
-	      sol_trs.(i) <- sol_tr;
-	      File.write_lines ("../pb/convex/fit/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem (pb_tr pb)))
-	    with
-	    | Not_found ->
-	       let pb_tr, sol_tr = translate_left_bottom_on_zero pb in
-	       if included_in_unit_square (pb_tr pb) then (
-		 todo.(i) <- true;
-		 sol_trs.(i) <- sol_tr;
-		 File.write_lines ("../pb/convex/fit/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem (pb_tr pb)))
-	       ) else
-		 ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/convex/dontfit/" ^ (string_of_int i) ^ ".pb "))
-	else
-	  ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/notconvex/" ^ (string_of_int i) ^ ".pb "))
-      )
+      let pb = parse_problem ("../pb/notconvex/" ^ (string_of_int i) ^ ".pb") in
+      let hull = convex_hull pb in
+      File.write_lines ("../pb/notconvex/hull/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem ([hull],[])))
     with
     | _ -> ()
-  done;
-  print_endline "ok? (press enter)";
-  ignore (read_line ());
-  for i = 1 to pb_max do
-    if todo.(i) then
-      let yaya_sol = parse_solution ("../pb/yaya/" ^ (string_of_int i) ^ ".sol") in
-      File.write_lines ("../pb/" ^ (string_of_int i) ^ ".sol") (Enum.singleton (string_of_solution (sol_trs.(i) yaya_sol)))
   done
 
+  (* let i = 15 in *)
+  (* let pb = parse_problem ("../pb/notconvex/" ^ (string_of_int i) ^ ".pb") in *)
+  (* let hull = convex_hull pb in *)
+  (* File.write_lines ("../pb/notconvex/" ^ (string_of_int i) ^ "_hull.pb") (Enum.singleton (string_of_problem ([hull],[]))) *)
 
+  (* let s = Stack.create () in *)
+  (* Stack.push 1 s; Stack.push 2 s; Stack.push 3 s; *)
+  (* print_endline (dump s); *)
+  (* print_int (Stack.top s); print_newline (); *)
+  (* print_int (next_top s); print_newline (); *)
+  (* print_endline (dump s); *)
   
-
-
-
-  
-  (* print_int (length !pbs); print_newline (); *)
-  (* print_int (length (filter_map try_rotate (map snd !pbs))); print_newline (); *)
-  
-  (* let pb', transf = translate (inv (left_bottom_point (fst pb))) pb in *)
-  (* print_string (string_of_solution (transf id_sol));; *)
-  (* print_string (string_of_solution (try_rotate pb)) *)
-
-
-
-	       
-(* type point = num * num *)
-(* type segment = point * point *)
-			 
-(* type polygon = point list *)
-
-(* type silhouette = polygon list *)
-(* type skeleton = segment list *)
-
-(* type problem = silhouette * skeleton *)
-(* type solution = (point list) * (point list) * (int list list) *)
+	    
+(* let () = *)
+(*   let pb_max = 5009 in *)
+(*   let sol_trs = Array.make (succ pb_max) (fun s -> s) in *)
+(*   let todo = Array.make (succ pb_max) false in *)
+(*   for i = 1 to pb_max do *)
+(*     try *)
+(*       let pb = parse_problem ("../pb/" ^ (string_of_int i) ^ ".pb") in *)
+(*       try *)
+(* 	let pb_tr, sol_tr = solve_by_translation_rotate pb in *)
+(* 	(\* ignore (Sys.command ("mv ../pb/" ^ (string_of_int i) ^ ".pb ../pb/solved/" ^ (string_of_int i) ^ ".pb ")); *\) *)
+(* 	File.write_lines ("../pb/" ^ (string_of_int i) ^ ".sol") (Enum.singleton (string_of_solution (sol_tr id_sol))) *)
+(*       with *)
+(*       | Not_found -> ( *)
+(* 	if is_convex_pb pb then *)
+(* 	  if included_in_unit_square pb then ( *)
+(* 	    todo.(i) <- true; *)
+(* 	    ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/convex/fit/" ^ (string_of_int i) ^ ".pb ")) *)
+(* 	  ) else *)
+(* 	    try *)
+(* 	      let pb_tr, sol_tr = fit_by_translation_rotate pb in *)
+(* 	      todo.(i) <- true; *)
+(* 	      sol_trs.(i) <- sol_tr; *)
+(* 	      File.write_lines ("../pb/convex/fit/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem (pb_tr pb))) *)
+(* 	    with *)
+(* 	    | Not_found -> *)
+(* 	       let pb_tr, sol_tr = translate_left_bottom_on_zero pb in *)
+(* 	       if included_in_unit_square (pb_tr pb) then ( *)
+(* 		 todo.(i) <- true; *)
+(* 		 sol_trs.(i) <- sol_tr; *)
+(* 		 File.write_lines ("../pb/convex/fit/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem (pb_tr pb))) *)
+(* 	       ) else *)
+(* 		 ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/convex/dontfit/" ^ (string_of_int i) ^ ".pb ")) *)
+(* 	else *)
+(* 	  ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/notconvex/" ^ (string_of_int i) ^ ".pb ")) *)
+(*       ) *)
+(*     with *)
+(*     | _ -> () *)
+(*   done; *)
+(*   print_endline "ok? (press enter)"; *)
+(*   ignore (read_line ()); *)
+(*   for i = 1 to pb_max do *)
+(*     if todo.(i) then *)
+(*       try *)
+(* 	let yaya_sol = parse_solution ("../pb/yaya/" ^ (string_of_int i) ^ ".sol") in *)
+(* 	File.write_lines ("../pb/" ^ (string_of_int i) ^ ".sol") (Enum.singleton (string_of_solution (sol_trs.(i) yaya_sol))) *)
+(*       with *)
+(*       | _ -> () *)
+(*   done *)

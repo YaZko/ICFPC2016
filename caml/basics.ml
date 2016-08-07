@@ -76,7 +76,7 @@ let width = 950
 let draw_polygon (sat : num * num -> int * int) (p : polygon) : unit =
   if is_positive p then
     set_color red
-  else set_color white;
+  else set_color yellow;
   let p' = Array.map sat (Array.of_list p) in
   fill_poly p'
 
