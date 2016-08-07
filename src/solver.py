@@ -809,11 +809,11 @@ def solve(idx,pb):
         vy = - min([p.y for p in verts])
         trans_v = Point(vx,vy)
 
-    # print('\nGoal: {}\n'.format(verts))
+    print('\nGoal: {}\n'.format(verts))
 
     verts = translate_poly(verts,trans_v)
 
-    # print('\nGoal after translation: {}\n'.format(verts))
+    print('\nGoal after translation: {}\n'.format(verts))
 
     if not poly_in_square(verts):
         raise
@@ -831,7 +831,7 @@ def solve(idx,pb):
         #     raise
 
         for (i,_) in enumerate(verts):
-            # print('current : {}'.format(current))
+            print('current : {}'.format(current))
             # if is_included(verts,current):
             # print('finished? {} and {}'.format(verts,current))
             # print('plop : {}'.format(rotate_to_fit(current,verts[0])))
@@ -844,8 +844,12 @@ def solve(idx,pb):
                 else:
                     j = i+1
                 e = Edge(verts[i],verts[j])
-                # print('Folding along e : {}'.format(e))
+                print('Folding along e : {}'.format(e))
                 current,facets_init = fold(current,e,-1,facets_init)
+
+        if verts == rotate_to_fit(current,verts[0]):
+            unfinished = False
+            break
 
         if current == rotate_to_fit(snapshot,current[0]):
             print('Problem {} has cycled'.format(idx))
@@ -963,14 +967,14 @@ def solve_prob(id):
     sol = solve(id,pb)
     sol.output('../fitting_convex/sol/' + str(id) + '.sol')
 
-# solve_prob(10)
+solve_prob(73)
 
-for i in range(6000):
-    try:
-        solve_prob(i)
-        print(i)
-    except:
-        pass
+# for i in range(6000):
+#     try:
+#         solve_prob(i)
+#         # print(i)
+#     except:
+#         pass
 
 # for i in range(2237,2727):
 #     try:
