@@ -43,3 +43,29 @@ let parse_problem (filename : string) : problem =
     skel := !skel @ [parse_segment (read_line f)];
   done;
   !silh, !skel
+
+let parse_solution (filename : string) : solution =
+  let f = open_in filename in
+  (* parse points *)
+  let nb_points = int_of_string (read_line f) in
+  let points = ref [] in
+  for p = 1 to nb_points do
+    let v = parse_point (read_line f) in
+    points := !points @ [v]
+  done;
+  (* parse facets *)
+  let nb_facets = int_of_string (read_line f) in
+  let facets = ref [] in
+  for p = 1 to nb_facets do
+    let s = read_line f in
+    let l = String.nsplit s " " in
+    facets := !facets @ [map int_of_string (tl l)]
+  done;
+  (* parse dests *)
+  let dests = ref [] in
+  for p = 1 to nb_points do
+    let v = parse_point (read_line f) in
+    dests := !dests @ [v]
+  done;
+  !points, !dests, !facets
+  

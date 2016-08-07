@@ -14,9 +14,9 @@ let () =
   for i = 1 to 2730 do
     clear_graph ();
     try
-      draw_problem (parse_problem ("../pb/" ^ (string_of_int i) ^ ".pb"));
+      draw_problem (parse_problem ("../pb/convex/dontfit/" ^ (string_of_int i) ^ ".pb"));
       let img = get_image 0 0 width width in
-      Images.sauver_image (dump_image img) ("../pb/" ^ (string_of_int i) ^ ".png");
+      Images.sauver_image (dump_image img) ("../pb/convex/dontfit/" ^ (string_of_int i) ^ ".png");
     with
     | _ -> ()
   done;

@@ -16,10 +16,22 @@ type problem = silhouette * skeleton
 type solution = (point list) * (point list) * (int list list)
 
 let string_of_point (x, y : point) = (Num.to_string x) ^ "," ^ (Num.to_string y)
-let string_of_segment (p, q : segment) = "(" ^ (string_of_point p) ^ ";" ^ (string_of_point q) ^ ")"
+(* let string_of_segment (p, q : segment) = "(" ^ (string_of_point p) ^ ";" ^ (string_of_point q) ^ ")" *)
+let string_of_segment (p, q : segment) = (string_of_point p) ^ " " ^ (string_of_point q)
 let string_of_polygon (l : polygon) = "[" ^ String.concat ";" (map string_of_point l) ^ "]"
 											 
-(* let string_of_problem (s, sk  *)
+let string_of_problem (sil, sk : problem) : string =
+  let s = output_string () in
+  write_line s (string_of_int (length sil));
+  print ~first:"" ~last:"" ~sep:"\n"
+	(fun out poly -> write_line out (string_of_int (length poly));
+			 print  ~first:"" ~last:"\n" ~sep:"\n" (fun out point -> nwrite out (string_of_point point)) out poly)
+	s sil;
+  write_line s (string_of_int (length sk));
+  print ~first:"" ~last:"\n" ~sep:"\n"
+	(fun out seg -> nwrite out (string_of_segment seg)) s sk;
+  close_out s
+
 
 let string_of_solution (points, dests, facets : solution) : string =
   let s = output_string () in
