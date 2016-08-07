@@ -296,6 +296,16 @@ class Point():
         # If det is negative, the point is on the right of the edge (the sinus is negative)
         return det * dir > 0
 
+    # Return the translation of the point by the vector (encoded as a Point) p
+    def translate(self,p):
+        rx = self.x + p.x
+        ry = self.y + p.y
+        return Point(rx,ry)
+
+    # Tests if a point fit in the initial square
+    def fit_in_square(self):
+        return self.x >=0 and self.x <= 1 and self.y >= 0 and self.y <= 1
+
     # Seen as a vector, computes its scalar product
     def scalar(self,p):
         return self.x * p.x + self.y * p.y
@@ -517,6 +527,16 @@ class Sol():
 
         f.close()
 
+# Translate a polygone defined as its list of verticies
+def translate_poly(poly,v):
+    res = []
+    for p in poly:
+        res.append(p.translate(v))
+    return res
+
+# Tests whether a polygone defined as a list of verticies fits in the initial square
+def poly_in_square(poly):
+    return all(v.fit_in_square() for v in poly)
 
 # We assume the problem to be reduce to a single, convex polygon
 
@@ -599,7 +619,6 @@ def are_moved(verts,edge,dir):
     # print('Returning from are_moved with l1 = {} and l2 = {}'.format(l1,l2))
     return (l1_,l2_)
 
-
 def inverse(edge,tsfs):
     p1 = edge.p1
     p2 = edge.p2
@@ -610,11 +629,11 @@ def inverse(edge,tsfs):
         p2 = aux
     return Edge(p1,p2)
 
-def transf_point(p,tsfs):
+def transf_point(p,tsfs,translation):
     # print('inversing for {}'.format(tsfs))
     for tsf in tsfs:
         p = p.move_to(tsf)
-    return p
+    return p.translate(translation)
 
 def update_facet(verts,edge,dir,tsfs):
 
@@ -782,18 +801,32 @@ def solve(pb):
     verts = pb.silhouette
     # print('Goal: {}'.format(verts))
 
-    # index = {p00:[0],p10:[1],p01:[2],p11:[3]}
-    # mapping = {0:p00,1:p10,2:p01,3:p11}
+    # Computes if an initial translation is needed to fit in the square
+    if poly_in_square(verts):
+        trans_v = Point(0,0)
+    else:
+        vx = - min([p.x for p in verts])
+        vy = - min([p.y for p in verts])
+        trans_v = Point(vx,vy)
+
+    print('\nGoal: {}\n'.format(verts))
+
+    verts = translate_poly(verts,trans_v)
+
+    if not poly_in_square(verts):
+        raise
+
     facets_init = [(current,[])]
 
     unfinished = True
-    k = 0
+
+    # k = 0
     while unfinished:
-        if k == 40:
-            raise 
-        k += 1
+        snapshot = current
+        # print('CYCLED')
+        # k += 1
         for (i,_) in enumerate(verts):
-            # print('current : {}\n'.format(current))
+            print('current : {}'.format(current))
             # if is_included(verts,current):
             # print('finished? {} and {}'.format(verts,current))
             # print('plop : {}'.format(rotate_to_fit(current,verts[0])))
@@ -806,8 +839,10 @@ def solve(pb):
                 else:
                     j = i+1
                 e = Edge(verts[i],verts[j])
-                # print('Folding along e : {}'.format(e))
+                print('Folding along e : {}'.format(e))
                 current,facets_init = fold(current,e,-1,facets_init)
+
+        
 
     # print('pretty please: {}'.format(facets_init))
     facets_init = [(elim_col(elim_doubles(l[0])),l[1]) for l in facets_init]
@@ -817,6 +852,8 @@ def solve(pb):
         # print(l)
     # print('\n\n')
 
+    trans_v = Point(-trans_v.x,-trans_v.y)
+
     points = []
     dest = {}
     facets = []
@@ -825,7 +862,7 @@ def solve(pb):
         for p in l[0]:
             if not p in points:
                 points.append(p)
-                dest[p] = transf_point(p,l[1])
+                dest[p] = transf_point(p,l[1],trans_v)
 
     # print('\n\n')
     # print('dests: {}'.format(dest))
@@ -835,9 +872,6 @@ def solve(pb):
     return Sol(points,facets,dest)
 
 # Testing
-# pb = parse('../pb/ex')
-# poly = pb.silhouette[0]
-# e = Edge(Point(Fraction(1),Fraction(1)),Point(Fraction(2),Fraction(2)))
 
 p00 =  Point(Fraction(0),Fraction(0))
 p00_ = Point(Fraction(0),Fraction(0))
@@ -916,24 +950,30 @@ baz = Edge(Point(Fraction(2,3),Fraction(0)),Point(Fraction(1,3),Fraction(1)))
 # sol9 = solve(pb9)
 # sol9.output('../sol/9.sol')
 
-def solve_prob(name):
-    pb = parse('../fitting/' + name + '.pb')
+def solve_prob(id):
+    pb = parse('../pb/' + str(id) + '.pb')
     sol = solve(pb)
-    sol.output('../sol/' + name + '.sol')
+    sol.output('../sol/' + str(id) + '.sol')
 
-# for i in range(2237):
+try:
+    solve_prob(19)
+except:
+    pass
+
+# for i in range(15,20):
+#     try:
+#         print(i)
+#         solve_prob(i)
+#         print(i)
+#     except:
+#         pass
+
+# for i in range(2237,2727):
 #     try:
 #         solve_prob(str(i))
 #         print(i)
 #     except:
 #         pass
-
-for i in range(2237,2727):
-    try:
-        solve_prob(str(i))
-        print(i)
-    except:
-        pass
 
 
 # pb9 = parse('../fitting/9.pb')
