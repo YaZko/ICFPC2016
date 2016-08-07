@@ -755,7 +755,7 @@ def elim_col(poly):
 
 # Given a current state of the sheet, an edge and the direction of the folding, fold the sheet upon this edge.
 def fold(current,edge,dir,facets_init):
-    # print('\n\nFolding {} along {} in direction {}'.format(current,edge,dir))
+    print('\n\nFolding {} along {} in direction {}'.format(current,edge,dir))
     # print('facets_init = {}'.format(facets_init))
     polys,main = are_moved(current,edge,dir)
 
@@ -766,7 +766,10 @@ def fold(current,edge,dir,facets_init):
     # print('new_facets_init = {}'.format(new_facets_init))
     # print('unifying polys: {} with main: {}'.format(polys,main))
     for poly in polys:
-        main = join(main,poly)
+        if main == []:
+            main = poly
+        elif not poly == []:
+            main = join(main,poly)
         # print(main)
     # print('Resulting poly : {}'.format(main))
     return (elim_col(main),new_facets_init)
@@ -809,14 +812,14 @@ def solve(idx,pb):
         vy = - min([p.y for p in verts])
         trans_v = Point(vx,vy)
 
-    print('\nGoal: {}\n'.format(verts))
+    # print('\nGoal: {}\n'.format(verts))
 
     verts = translate_poly(verts,trans_v)
 
-    print('\nGoal after translation: {}\n'.format(verts))
+    # print('\nGoal after translation: {}\n'.format(verts))
 
-    if not poly_in_square(verts):
-        raise
+    # if not poly_in_square(verts):
+    #     raise
 
     facets_init = [(current,[])]
 
@@ -826,12 +829,12 @@ def solve(idx,pb):
     while unfinished:
         snapshot = current
         # print('CYCLED')
-        # k += 1
-        # if k == 4:
-        #     raise
+        k += 1
+        if k == 10:
+            raise
 
         for (i,_) in enumerate(verts):
-            print('current : {}'.format(current))
+            # print('current : {}'.format(current))
             # if is_included(verts,current):
             # print('finished? {} and {}'.format(verts,current))
             # print('plop : {}'.format(rotate_to_fit(current,verts[0])))
@@ -844,16 +847,15 @@ def solve(idx,pb):
                 else:
                     j = i+1
                 e = Edge(verts[i],verts[j])
-                print('Folding along e : {}'.format(e))
+                # print('Folding along e : {}'.format(e))
                 current,facets_init = fold(current,e,-1,facets_init)
 
         if verts == rotate_to_fit(current,verts[0]):
             unfinished = False
-            break
 
         if current == rotate_to_fit(snapshot,current[0]):
-            print('Problem {} has cycled'.format(idx))
-            break
+            unfinished = False
+            # print('Problem {} has cycled'.format(idx))
             # raise('Cycled without change')
 
     # print('pretty please: {}'.format(facets_init))
@@ -963,39 +965,28 @@ baz = Edge(Point(Fraction(2,3),Fraction(0)),Point(Fraction(1,3),Fraction(1)))
 # sol9.output('../sol/9.sol')
 
 def solve_prob(id):
-    pb = parse('pb/convex/fit/' + str(id) + '.pb')
+    pb = parse('../pb/' + str(id) + '.pb')
     sol = solve(id, pb)
-    sol.output('pb/yaya/' + str(id) + '.sol')
+    sol.output('../sol2/' + str(id) + '.sol')
 
-<<<<<<< HEAD
-solve_prob(73)
-
+solve_prob(27)
 # for i in range(6000):
 #     try:
 #         solve_prob(i)
-#         # print(i)
+#         print(i)
 #     except:
 #         pass
+
 
 # for i in range(2237,2727):
-=======
-# for i in range(15,20):
->>>>>>> 9c1cb0e038cb791c5d27ba735484a5ddfed31b94
+
+# for i in range(5900):
 #     try:
-#         print(i)
 #         solve_prob(i)
-#         print(i)
-#     except:
-#         pass
-
-
-for i in range(5900):
-    try:
-        solve_prob(i)
-        print(i)
-    except Exception as e:
-        # print(e)
-        pass  
+#         # print(i)
+#     except Exception as e:
+#         # print(e)
+#         pass  
 
 # pb9 = parse('../fitting/9.pb')
 # pb10 = parse('../fitting/10.pb')
