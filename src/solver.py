@@ -809,9 +809,11 @@ def solve(pb):
         vy = - min([p.y for p in verts])
         trans_v = Point(vx,vy)
 
-    print('\nGoal: {}\n'.format(verts))
+    # print('\nGoal: {}\n'.format(verts))
 
     verts = translate_poly(verts,trans_v)
+
+    # print('\nGoal after translation: {}\n'.format(verts))
 
     if not poly_in_square(verts):
         raise
@@ -820,13 +822,16 @@ def solve(pb):
 
     unfinished = True
 
-    # k = 0
+    k = 0
     while unfinished:
         snapshot = current
         # print('CYCLED')
-        # k += 1
+        k += 1
+        if k == 4:
+            raise
+
         for (i,_) in enumerate(verts):
-            print('current : {}'.format(current))
+            # print('current : {}'.format(current))
             # if is_included(verts,current):
             # print('finished? {} and {}'.format(verts,current))
             # print('plop : {}'.format(rotate_to_fit(current,verts[0])))
@@ -839,10 +844,11 @@ def solve(pb):
                 else:
                     j = i+1
                 e = Edge(verts[i],verts[j])
-                print('Folding along e : {}'.format(e))
+                # print('Folding along e : {}'.format(e))
                 current,facets_init = fold(current,e,-1,facets_init)
 
-        
+        if current == rotate_to_fit(snapshot,current[0]):
+            raise('Cycled without change')
 
     # print('pretty please: {}'.format(facets_init))
     facets_init = [(elim_col(elim_doubles(l[0])),l[1]) for l in facets_init]
