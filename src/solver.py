@@ -963,10 +963,11 @@ baz = Edge(Point(Fraction(2,3),Fraction(0)),Point(Fraction(1,3),Fraction(1)))
 # sol9.output('../sol/9.sol')
 
 def solve_prob(id):
-    pb = parse('../fitting_convex/' + str(id) + '.pb')
-    sol = solve(id,pb)
-    sol.output('../fitting_convex/sol/' + str(id) + '.sol')
+    pb = parse('pb/convex/fit/' + str(id) + '.pb')
+    sol = solve(id, pb)
+    sol.output('pb/yaya/' + str(id) + '.sol')
 
+<<<<<<< HEAD
 solve_prob(73)
 
 # for i in range(6000):
@@ -977,12 +978,24 @@ solve_prob(73)
 #         pass
 
 # for i in range(2237,2727):
+=======
+# for i in range(15,20):
+>>>>>>> 9c1cb0e038cb791c5d27ba735484a5ddfed31b94
 #     try:
-#         solve_prob(str(i))
+#         print(i)
+#         solve_prob(i)
 #         print(i)
 #     except:
 #         pass
 
+
+for i in range(5900):
+    try:
+        solve_prob(i)
+        print(i)
+    except Exception as e:
+        # print(e)
+        pass  
 
 # pb9 = parse('../fitting/9.pb')
 # pb10 = parse('../fitting/10.pb')

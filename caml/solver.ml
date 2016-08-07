@@ -208,75 +208,63 @@ let convex_hull (s, _ : problem) : polygon =
 
 
 
-let () =
-
-  for i = 1 to 4909 do
-    try
-      let pb = parse_problem ("../pb/notconvex/" ^ (string_of_int i) ^ ".pb") in
-      let hull = convex_hull pb in
-      File.write_lines ("../pb/notconvex/hull/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem ([hull],[])))
-    with
-    | _ -> ()
-  done
-
-  (* let i = 15 in *)
-  (* let pb = parse_problem ("../pb/notconvex/" ^ (string_of_int i) ^ ".pb") in *)
-  (* let hull = convex_hull pb in *)
-  (* File.write_lines ("../pb/notconvex/" ^ (string_of_int i) ^ "_hull.pb") (Enum.singleton (string_of_problem ([hull],[]))) *)
-
-  (* let s = Stack.create () in *)
-  (* Stack.push 1 s; Stack.push 2 s; Stack.push 3 s; *)
-  (* print_endline (dump s); *)
-  (* print_int (Stack.top s); print_newline (); *)
-  (* print_int (next_top s); print_newline (); *)
-  (* print_endline (dump s); *)
-  
-	    
 (* let () = *)
-(*   let pb_max = 5009 in *)
-(*   let sol_trs = Array.make (succ pb_max) (fun s -> s) in *)
-(*   let todo = Array.make (succ pb_max) false in *)
-(*   for i = 1 to pb_max do *)
+
+(*   for i = 1 to 4909 do *)
 (*     try *)
-(*       let pb = parse_problem ("../pb/" ^ (string_of_int i) ^ ".pb") in *)
-(*       try *)
-(* 	let pb_tr, sol_tr = solve_by_translation_rotate pb in *)
-(* 	(\* ignore (Sys.command ("mv ../pb/" ^ (string_of_int i) ^ ".pb ../pb/solved/" ^ (string_of_int i) ^ ".pb ")); *\) *)
-(* 	File.write_lines ("../pb/" ^ (string_of_int i) ^ ".sol") (Enum.singleton (string_of_solution (sol_tr id_sol))) *)
-(*       with *)
-(*       | Not_found -> ( *)
-(* 	if is_convex_pb pb then *)
-(* 	  if included_in_unit_square pb then ( *)
-(* 	    todo.(i) <- true; *)
-(* 	    ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/convex/fit/" ^ (string_of_int i) ^ ".pb ")) *)
-(* 	  ) else *)
-(* 	    try *)
-(* 	      let pb_tr, sol_tr = fit_by_translation_rotate pb in *)
-(* 	      todo.(i) <- true; *)
-(* 	      sol_trs.(i) <- sol_tr; *)
-(* 	      File.write_lines ("../pb/convex/fit/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem (pb_tr pb))) *)
-(* 	    with *)
-(* 	    | Not_found -> *)
-(* 	       let pb_tr, sol_tr = translate_left_bottom_on_zero pb in *)
-(* 	       if included_in_unit_square (pb_tr pb) then ( *)
-(* 		 todo.(i) <- true; *)
-(* 		 sol_trs.(i) <- sol_tr; *)
-(* 		 File.write_lines ("../pb/convex/fit/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem (pb_tr pb))) *)
-(* 	       ) else *)
-(* 		 ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/convex/dontfit/" ^ (string_of_int i) ^ ".pb ")) *)
-(* 	else *)
-(* 	  ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/notconvex/" ^ (string_of_int i) ^ ".pb ")) *)
-(*       ) *)
+(*       let pb = parse_problem ("../pb/notconvex/" ^ (string_of_int i) ^ ".pb") in *)
+(*       let hull = convex_hull pb in *)
+(*       File.write_lines ("../pb/notconvex/hull/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem ([hull],[]))) *)
 (*     with *)
 (*     | _ -> () *)
-(*   done; *)
-(*   print_endline "ok? (press enter)"; *)
-(*   ignore (read_line ()); *)
-(*   for i = 1 to pb_max do *)
-(*     if todo.(i) then *)
-(*       try *)
-(* 	let yaya_sol = parse_solution ("../pb/yaya/" ^ (string_of_int i) ^ ".sol") in *)
-(* 	File.write_lines ("../pb/" ^ (string_of_int i) ^ ".sol") (Enum.singleton (string_of_solution (sol_trs.(i) yaya_sol))) *)
-(*       with *)
-(*       | _ -> () *)
 (*   done *)
+  
+	    
+let () =
+  let pb_max = 5887 in
+  let sol_trs = Array.make (succ pb_max) (fun s -> s) in
+  let todo = Array.make (succ pb_max) false in
+  for i = 1 to pb_max do
+    try
+      let pb = parse_problem ("../pb/" ^ (string_of_int i) ^ ".pb") in
+      try
+	let pb_tr, sol_tr = solve_by_translation_rotate pb in
+	(* ignore (Sys.command ("mv ../pb/" ^ (string_of_int i) ^ ".pb ../pb/solved/" ^ (string_of_int i) ^ ".pb ")); *)
+	File.write_lines ("../pb/" ^ (string_of_int i) ^ ".sol") (Enum.singleton (string_of_solution (sol_tr id_sol)))
+      with
+      | Not_found -> (
+	if is_convex_pb pb then
+	  if included_in_unit_square pb then (
+	    todo.(i) <- true;
+	    ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/convex/fit/" ^ (string_of_int i) ^ ".pb "))
+	  ) else
+	    try
+	      let pb_tr, sol_tr = fit_by_translation_rotate pb in
+	      todo.(i) <- true;
+	      sol_trs.(i) <- sol_tr;
+	      File.write_lines ("../pb/convex/fit/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem (pb_tr pb)))
+	    with
+	    | Not_found ->
+	       let pb_tr, sol_tr = translate_left_bottom_on_zero pb in
+	       if included_in_unit_square (pb_tr pb) then (
+		 todo.(i) <- true;
+		 sol_trs.(i) <- sol_tr;
+		 File.write_lines ("../pb/convex/fit/" ^ (string_of_int i) ^ ".pb") (Enum.singleton (string_of_problem (pb_tr pb)))
+	       ) else
+		 ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/convex/dontfit/" ^ (string_of_int i) ^ ".pb "))
+	else
+	  ignore (Sys.command ("cp ../pb/" ^ (string_of_int i) ^ ".pb ../pb/notconvex/" ^ (string_of_int i) ^ ".pb "))
+      )
+    with
+    | _ -> ()
+  done;
+  print_endline "ok? (press enter)";
+  ignore (read_line ());
+  for i = 1 to pb_max do
+    if todo.(i) then
+      try
+	let yaya_sol = parse_solution ("../pb/yaya/" ^ (string_of_int i) ^ ".sol") in
+	File.write_lines ("../pb/" ^ (string_of_int i) ^ ".sol") (Enum.singleton (string_of_solution (sol_trs.(i) yaya_sol)))
+      with
+      | _ -> ()
+  done
