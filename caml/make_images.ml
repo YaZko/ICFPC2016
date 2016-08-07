@@ -6,7 +6,8 @@ open List
 open Basics
 open Myparsing
 
-
+let dirpath = "../pb/"
+		
 let () =
   open_graph "";
   set_window_title "youhou";
@@ -14,10 +15,10 @@ let () =
   for i = 1 to 100 do
     clear_graph ();
     try
-      draw_problem (parse_problem ("../pb/notconvex/hull/" ^ (string_of_int i) ^ ".pb"));
+      draw_problem (parse_problem (dirpath ^ (string_of_int i) ^ ".pb"));
       let img = get_image 0 0 width width in
-      Images.sauver_image (dump_image img) ("../pb/notconvex/hull/" ^ (string_of_int i) ^ ".png");
-      clear_graph ();
+      Images.sauver_image (dump_image img) (dirpath ^ (string_of_int i) ^ ".png");
+      (* clear_graph (); *)
       (* draw_problem (parse_problem ("../pb/notconvex/" ^ (string_of_int i) ^ "_hull.pb")); *)
       (* let img = get_image 0 0 width width in *)
       (* Images.sauver_image (dump_image img) ("../pb/notconvex/" ^ (string_of_int i) ^ "_hull.png"); *)

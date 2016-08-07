@@ -9,3 +9,4 @@ snapshot.*
 caml/solver
 caml/make_images
 *.sol
+*.png
